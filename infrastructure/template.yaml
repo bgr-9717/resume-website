@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: Resume visitor counter backend
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 10
+    MemorySize: 128
+
+  Api:
+    Cors:
+      AllowMethods: "'GET,OPTIONS'"
+      AllowHeaders: "'Content-Type'"
+      AllowOrigin: "'*'"
+
+Resources:
+
+  ResumeVisitorCounterTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: ResumeVisitorCounter
+      PrimaryKey:
+        Name: id
+        Type: String
+
+  VisitorCounterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/visitor_counter
+      Handler: app.lambda_handler
+
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref ResumeVisitorCounterTable
+
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ResumeVisitorCounterTable
+
+      Events:
+        GetVisitorCount:
+          Type: Api
+          Properties:
+            Path: /count
+            Method: GET
