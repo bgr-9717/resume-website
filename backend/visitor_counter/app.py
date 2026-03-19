@@ -1,11 +1,27 @@
-import os
 import json
+import os
+import logging
 import boto3
 from botocore.exceptions import ClientError
 
+# Configure logger
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
 dynamodb = boto3.resource("dynamodb")
+cloudwatch = boto3.client("cloudwatch")
 TABLE_NAME = os.environ.get("TABLE_NAME", "ResumeVisitorCounter")
 table = dynamodb.Table(TABLE_NAME)
+
+
+def log_json(level, message, **kwargs):
+    log_entry = {
+        "level": level,
+        "message": message,
+        **kwargs
+    }
+    logger.info(json.dumps(log_entry))
+
 
 def lambda_handler(event, context):
     try:
@@ -15,24 +31,48 @@ def lambda_handler(event, context):
             ExpressionAttributeNames={"#count": "count"},
             ExpressionAttributeValues={":inc": 1},
             ReturnValues="UPDATED_NEW",
+        ) 
+
+        new_count = int(response["Attributes"]["count"])
+
+        cloudwatch.put_metric_data(
+          Namespace="ResumeApp",
+              MetricData=[
+          {
+            "MetricName": "VisitorCountIncrement",
+            "Value": 1,
+            "Unit": "Count"
+          }
+         ]
         )
 
-        count = int(response["Attributes"]["count"])
+        log_json(
+            "INFO",
+            "Visitor count updated",
+            new_count=new_count,
+            request_id=context.aws_request_id
+        )
 
         return {
-              "statusCode": 200,
-              "headers": {
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*",
-               "Access-Control-Allow-Methods": "GET,OPTIONS",
-               "Access-Control-Allow-Headers": "Content-Type"
+            "statusCode": 200,
+            "headers": {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET,OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type"
             },
-             "body": json.dumps({"count": count})
+            "body": json.dumps({"count": new_count})
         }
 
+    except ClientError as e:
+        log_json(
+            "ERROR",
+            "DynamoDB update failed",
+            error=str(e),
+            request_id=context.aws_request_id
+        )
 
-    except ClientError:
         return {
             "statusCode": 500,
-            "body": "Error updating visitor count",
+            "body": "Error updating visitor count"
         }
