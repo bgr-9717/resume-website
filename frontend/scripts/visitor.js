@@ -1,4 +1,4 @@
-const API_URL =
+ const API_URL =
   "https://hljgoysvxl.execute-api.af-south-1.amazonaws.com/Prod/count";
 
 async function fetchVisitorCount() {
