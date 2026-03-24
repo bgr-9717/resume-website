@@ -194,3 +194,6 @@ resume-website/
  * Structured logging, monitoring, and observability
  * Performance optimization via caching headers and CDN
  * Production-ready deployment workflows
+
+## LICENSE
+MIT License © B. FAKO
