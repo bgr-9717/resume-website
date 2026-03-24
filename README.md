@@ -1,5 +1,5 @@
 # Cloud Resume Project 
-
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 ## Overview
 
 This project is a **fully serverless, cloud-hosted personal resume website**. It demonstrates a full-stack AWS serverless architecture, including:
@@ -37,8 +37,11 @@ DynamoDB Table (Visitor Count)
    │
    ▼
 CloudWatch Logs & Metrics
+```
+ 
 
----
+
+
 
 ### Key features:
 
@@ -77,29 +80,32 @@ resume-website/
 ├── samconfig.toml          # SAM CLI deployment config
 ├── README.md               # Project documentation
 └── .gitignore
+```
 
 ## Features
 
 ### Frontend
 
-```text
+
 
 * HTML/CSS/JS static site
 * Responsive design suitable for desktop and mobile
 * Visitor counter calls the Lambda API to track visits
 * Cache headers set to optimize CloudFront performance
 
+
 ---
 
 ### Backend
 
-```text
+
 
 * AWS Lambda written in Python
 * Uses DynamoDB to store visitor counts
 * Structured JSON logging via CloudWatch
 * Custom CloudWatch metrics for monitoring site usage
 * Unit tests with pytest
+
 
 ## Infrastructure 
 
@@ -118,11 +124,73 @@ resume-website/
 
 ### Prerequisites
 * AWS account with IAM user having:
- * S3 full access
-Lambda full access
-DynamoDB full access
-CloudFront full access
-Route 53 full access
-AWS CLI installed and configured
-SAM CLI installed
-GitHub account for CI/CD
+  * S3 full access
+  * Lambda full access
+  * DynamoDB full access
+  * CloudFront full access
+  * Route 53 full access
+* AWS CLI installed and configured
+* SAM CLI installed
+* GitHub account for CI/CD
+
+## Steps
+1. Clone the repo
+
+```bash
+   git clone https://github.com/YOUR_USERNAME/resume-website.git
+   cd resume-website
+```
+
+2. Deploy infrastructure with SAM
+```bash
+   cd infrastructure
+   sam build
+   sam deploy --guided
+```
+ 
+
+3. Upload frontend to S3
+
+
+   This is handled automatically by CI/CD, but you can also manually sync:
+
+```bash
+   aws s3 sync ../frontend/ s3://YOUR_BUCKET_NAME --delete
+```
+4. Invalidate CloudFront cache
+
+```bash 
+   aws cloudfront create-invalidation --distribution-id YOUR_CLOUDFRONT_ID --paths "/*"
+```
+
+5. Verify site
+
+   Open your browser at your custom domain with HTTPS:
+
+```bash
+   https://yourdomain.com
+```
+
+## CI/CD with GitHub Actions
+ * Workflow triggers on push to main branch
+ * Automatically deploys backend (Lambda + DynamoDB) and frontend (S3 + CloudFront)
+ * Invalidates CloudFront cache so updates appear immediately
+
+## Logging & Monitoring
+ * Structured JSON logs for every visitor increment
+ * CloudWatch metrics track visitor increments
+ * Alarms can be configured for error detection or unusual traffic
+
+## Future Enhancements
+ * X-Ray tracing for full request tracking across Lambda and API Gateway
+ * Optional analytics dashboard using CloudWatch Metrics + Logs Insights
+ * Additional frontend features: resume download, portfolio links
+
+## Skills Demonstrated
+ * AWS serverless architecture (Lambda, DynamoDB, API Gateway, S3, CloudFront, Route 53)
+ * CI/CD pipelines (GitHub Actions)
+ * Python backend development
+ * Frontend web development (HTML/CSS/JS)
+ * Structured logging, monitoring, and observability
+ * Performance optimization via caching headers and CDN
+ * Production-ready deployment workflows
