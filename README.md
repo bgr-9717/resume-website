@@ -116,9 +116,9 @@ resume-website/
 ## CI/CD
 * GitHub Actions workflow triggers on push to main branch
 * Automatically:
- * Builds and deploys Lambda (SAM)
- * Uploads frontend to S3
- * Invalidates CloudFront cache
+  * Builds and deploys Lambda (SAM)
+  * Uploads frontend to S3
+  * Invalidates CloudFront cache
 
 ## Deployment
 
